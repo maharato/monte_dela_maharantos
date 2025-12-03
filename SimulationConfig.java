@@ -1,0 +1,47 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+package Circle;
+
+/**
+ *
+ * @author ahmed
+ */
+
+public class SimulationConfig {
+
+    private long totalPoints;
+    private int numTasks;
+    private int numThreads;
+
+    public SimulationConfig(long totalPoints, int numTasks, int numThreads) {
+        this.totalPoints = totalPoints;
+        this.numTasks = numTasks;
+        this.numThreads = numThreads;
+    }
+
+    public long getTotalPoints() {
+        return totalPoints;
+    }
+
+    public int getNumTasks() {
+        return numTasks;
+    }
+
+    public int getNumThreads() {
+        return numThreads;
+    }
+
+    @Override
+    public String toString() {
+        return "SimulationConfig{" +
+                "totalPoints=" + totalPoints +
+                ", numTasks=" + numTasks +
+                ", numThreads=" + numThreads +
+                '}';
+    }
+}
+
+   
+

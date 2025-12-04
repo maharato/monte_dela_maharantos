@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Circle;
+package Circle.monte_dela_maharantos;
 
 /**
  *
@@ -21,16 +21,9 @@ public class ParallelPiEstimator implements PiEstimator {
     /** 
      * Visualization Point Callback 
      */
-    public interface PointListener {
-        void onPointGenerated(double x, double y, boolean inside);
-    }
 
-    private PointListener listener;
 
-    // Setter for GUI to register callback
-    public void setPointListener(PointListener listener) {
-        this.listener = listener;
-    }
+    
 
 
     @Override
@@ -58,15 +51,7 @@ public class ParallelPiEstimator implements PiEstimator {
                     boolean insidePoint = (x * x + y * y <= 1.0);
                     if (insidePoint) inside++;
 
-                    // 🔥 Notify GUI for visualization (if registered)
-                    if (listener != null) {
-                        double px = x;
-                        double py = y;
-                        listener.onPointGenerated(px, py, insidePoint);
-                    }
-                }
-                return inside;
-            };
+                    
 
             results.add(executor.submit(task));
         }

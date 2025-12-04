@@ -1,109 +1,135 @@
-    /*
+/*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package Circle;
+package Circle.monte_dela_maharantos;
+
 import java.util.ArrayList;
 import java.util.concurrent.*;
+import javax.swing.JOptionPane;
 import javax.swing.table.*;
+
 /**
  *
  * @author ahmed
  */
-
 public class PiExperimentRunner_form extends javax.swing.JFrame {
-    
-    
-    SimulationConfig config =new SimulationConfig(0,0,0);
-     
-    double pi_seq=0;
-    double pi_par=0;
-    long run_seq=0;
-    long run_par=0;
- 
-    
-    
-    
-    
-    double PiExperiment_sequntial(int totalpoints,int numTasks,int numthreads){
-SimulationConfig config=new SimulationConfig(totalpoints, numTasks, numthreads);
-SequentialPiEstimator seq=new SequentialPiEstimator();
-double estimatePi_Result=seq.estimatePi(config);
-       return estimatePi_Result;
-    }  
-     double PiExperiment_parallel(int totalpoints,int numTasks,int numthreads){
-SimulationConfig config=new SimulationConfig(totalpoints, numTasks, numthreads);
-ParallelPiEstimator par=new ParallelPiEstimator();
-double estimatePi_Result=par.estimatePi(config);
-       return estimatePi_Result;
+
+    SimulationConfig config = new SimulationConfig(0, 0, 0);
+
+    double pi_seq = 0;
+    double pi_par = 0;
+    long run_seq = 0;
+    long run_par = 0;
+    String type;
+
+    double PiExperiment_sequntial(int totalpoints, int numTasks, int numthreads) {
+        SimulationConfig config = new SimulationConfig(totalpoints, numTasks, numthreads);
+        SequentialPiEstimator seq = new SequentialPiEstimator();
+        double estimatePi_Result = seq.estimatePi(config);
+        return estimatePi_Result;
     }
-    
-     void fill_Table(double estimatePi_Result, long runTime,String version) {
 
-    DefaultTableModel Table = new DefaultTableModel();
-    String[] col = {"Run #", "Version", "Pi Value", "RunTime (ms)"};
-    Table.setColumnIdentifiers(col);
+    double PiExperiment_parallel(int totalpoints, int numTasks, int numthreads) {
+        SimulationConfig config = new SimulationConfig(totalpoints, numTasks, numthreads);
+        ParallelPiEstimator par = new ParallelPiEstimator();
+        double estimatePi_Result = par.estimatePi(config);
+        return estimatePi_Result;
+    }
 
-    Table.addRow(new Object[]{
-        "1",
-        version,
-        String.format("%.6f", estimatePi_Result),
-        String.format("%d", runTime)
-    });
+    void validator() {
 
-    jTable1.setModel(Table);
-}
+        String pointsStr = number_of_points.getText().trim();
+        String tasksStr = number_of_tasks.getText().trim();
+        String threadsStr = number_of_theards.getText().trim();
 
-     
-   void fill_Table(double seqResult, long seqTime,
-                double parResult, long parTime) {
+        // Check Empty Fields First
+        if (pointsStr.isEmpty() || tasksStr.isEmpty() || threadsStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ All fields must be filled!",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    DefaultTableModel Table = new DefaultTableModel();
+        // Check numeric only
+        if (!pointsStr.matches("\\d+") || !tasksStr.matches("\\d+") || !threadsStr.matches("\\d+")) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ Please enter valid positive numbers only!",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-    String[] columnNames = {
-        "Run #", 
-        "Version", 
-        "Pi Value", 
-        "RunTime (ms)"
-    };
-    Table.setColumnIdentifiers(columnNames);
+        // Check positive values
+        if (Integer.parseInt(pointsStr) <= 0
+                || Integer.parseInt(tasksStr) <= 0
+                || Integer.parseInt(threadsStr) <= 0) {
+            JOptionPane.showMessageDialog(this,
+                    "❌ All values must be greater than zero!",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    }
 
-    // Row 1: Sequential
-    Table.addRow(new Object[]{
-        "1", 
-        "Sequential",
-        String.format("%.6f", seqResult),
-        String.format("%d", seqTime)
-    });
+    void fill_Table(double estimatePi_Result, long runTime, String version) {
 
-    // Row 2: Parallel
-    Table.addRow(new Object[]{
-        "2", 
-        "Parallel",
-        String.format("%.6f", parResult),
-        String.format("%d", parTime)
-    });
+        DefaultTableModel Table = new DefaultTableModel();
+        String[] col = {"Run #", "Version", "Pi Value", "RunTime (ms)"};
+        Table.setColumnIdentifiers(col);
 
-    jTable1.setModel(Table);
-}
+        Table.addRow(new Object[]{
+            "1",
+            version,
+            String.format("%.6f", estimatePi_Result),
+            String.format("%d", runTime)
+        });
 
-  
-      
+        jTable1.setModel(Table);
+    }
 
-     
-  
-/**
+    void fill_Table(double seqResult, long seqTime,
+            double parResult, long parTime) {
+
+        DefaultTableModel Table = new DefaultTableModel();
+
+        String[] columnNames = {
+            "Run #",
+            "Version",
+            "Pi Value",
+            "RunTime (ms)"
+        };
+        Table.setColumnIdentifiers(columnNames);
+
+        // Row 1: Sequential
+        Table.addRow(new Object[]{
+            "1",
+            "Sequential",
+            String.format("%.6f", seqResult),
+            String.format("%d", seqTime)
+        });
+
+        // Row 2: Parallel
+        Table.addRow(new Object[]{
+            "2",
+            "Parallel",
+            String.format("%.6f", parResult),
+            String.format("%d", parTime)
+        });
+
+        jTable1.setModel(Table);
+    }
+
+    /**
      * Creates new form home
      */
     public PiExperimentRunner_form() {
         initComponents();
-         
-     
-    setLocationRelativeTo(null);
-    jFrame1.setSize(1000, 900);
-    jFrame1.setLocationRelativeTo(null);
-    
-        
+
+        setLocationRelativeTo(null);
+        setResizable(false);
+        jFrame1.setResizable(false);
+        jFrame1.setSize(1000, 900);
+        jFrame1.setLocationRelativeTo(null);
+
     }
 
     /**
@@ -121,6 +147,7 @@ double estimatePi_Result=par.estimatePi(config);
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         number_of_points = new javax.swing.JTextField();
@@ -162,6 +189,13 @@ double estimatePi_Result=par.estimatePi(config);
             }
         });
 
+        jButton2.setText("Back");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -175,7 +209,9 @@ double estimatePi_Result=par.estimatePi(config);
                 .addComponent(jButton1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(46, 46, 46)
+                .addComponent(jButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(310, 310, 310))
         );
@@ -183,7 +219,9 @@ double estimatePi_Result=par.estimatePi(config);
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(jLabel5)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5)
+                    .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 495, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(33, 33, 33)
@@ -227,8 +265,10 @@ double estimatePi_Result=par.estimatePi(config);
             }
         });
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel2.setText("number of points");
 
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setText("number of theards");
 
         Both.setText("Run both");
@@ -238,6 +278,7 @@ double estimatePi_Result=par.estimatePi(config);
             }
         });
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel4.setText("num of tasks");
 
         number_of_tasks.addActionListener(new java.awt.event.ActionListener() {
@@ -267,62 +308,58 @@ double estimatePi_Result=par.estimatePi(config);
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addComponent(Run_suq, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 104, Short.MAX_VALUE)
                 .addComponent(Run_par, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(21, 21, 21))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(58, 58, 58)
+                .addComponent(number_of_points, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(number_of_theards, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(104, 104, 104))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(41, 41, 41)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel3)
+                .addGap(83, 83, 83))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(141, 141, 141)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(number_of_tasks, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(32, 32, 32)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(188, 188, 188)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(64, 64, 64)
-                                .addComponent(number_of_points, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(48, 48, 48)
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(121, 121, 121)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(number_of_theards, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(122, 122, 122)
-                        .addComponent(Both, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(85, Short.MAX_VALUE))
+                        .addComponent(Both, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(133, 133, 133)
+                        .addComponent(number_of_tasks, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(163, 163, 163)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addGap(39, 39, 39)
+                .addGap(64, 64, 64)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3))
-                .addGap(6, 6, 6)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel2))
+                .addGap(14, 14, 14)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(number_of_points, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(number_of_theards, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(37, 37, 37)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(number_of_tasks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(158, 158, 158)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(Run_suq)
-                            .addComponent(Run_par))))
+                    .addComponent(number_of_theards, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(number_of_points, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(35, 35, 35)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(number_of_tasks, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(83, 83, 83)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Run_suq)
+                    .addComponent(Run_par))
                 .addGap(32, 32, 32)
                 .addComponent(Both)
                 .addContainerGap(259, Short.MAX_VALUE))
@@ -333,6 +370,7 @@ double estimatePi_Result=par.estimatePi(config);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -348,27 +386,39 @@ double estimatePi_Result=par.estimatePi(config);
 
     private void Run_parActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Run_parActionPerformed
         // TODO add your handling code here:
+        validator();
+        SimulationConfig con = new SimulationConfig(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
+
+        config = con;
         long startTime = System.currentTimeMillis();
-        double parallel_Resultt=PiExperiment_parallel(Integer.parseInt(number_of_points.getText()),Integer.parseInt(number_of_tasks.getText()),Integer.parseInt(number_of_theards.getText()));
+        double parallel_Resultt = PiExperiment_parallel(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
         long endTime = System.currentTimeMillis();
         long runTime_parallel = endTime - startTime;
+        pi_par = parallel_Resultt;
+        run_par = runTime_parallel;
+        type = "par";
         setVisible(false);
         jFrame1.setVisible(true);
-        fill_Table( parallel_Resultt, runTime_parallel,"parallel");
-        
-       
-        
+        fill_Table(parallel_Resultt, runTime_parallel, "parallel");
+
+
     }//GEN-LAST:event_Run_parActionPerformed
 
     private void Run_suqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Run_suqActionPerformed
+        validator();
+        SimulationConfig con = new SimulationConfig(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
+        config = con;
         long startTime = System.currentTimeMillis();
-        double sequntial_Resultt=PiExperiment_sequntial(Integer.parseInt(number_of_points.getText()),Integer.parseInt(number_of_tasks.getText()),Integer.parseInt(number_of_theards.getText()));
+        double sequntial_Resultt = PiExperiment_sequntial(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
         long endTime = System.currentTimeMillis();
         long runTime_sequntial = endTime - startTime;
+        pi_seq = sequntial_Resultt;
+        run_seq = runTime_sequntial;
+        type = "seq";
         setVisible(false);
         jFrame1.setVisible(true);
-        fill_Table( sequntial_Resultt, runTime_sequntial,"sequntial");
-        
+        fill_Table(sequntial_Resultt, runTime_sequntial, "sequntial");
+
     }//GEN-LAST:event_Run_suqActionPerformed
 
     private void number_of_tasksActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_number_of_tasksActionPerformed
@@ -376,26 +426,29 @@ double estimatePi_Result=par.estimatePi(config);
     }//GEN-LAST:event_number_of_tasksActionPerformed
 
     private void BothActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BothActionPerformed
-       SimulationConfig con=new SimulationConfig(Integer.parseInt(number_of_points.getText()),Integer.parseInt(number_of_tasks.getText()),Integer.parseInt(number_of_theards.getText()));
-       config=con;
+
+        validator();
+        SimulationConfig con = new SimulationConfig(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
+        config = con;
         long startTime = System.currentTimeMillis();
-        double sequntial_Resultt=PiExperiment_sequntial(Integer.parseInt(number_of_points.getText()),Integer.parseInt(number_of_tasks.getText()),Integer.parseInt(number_of_theards.getText()));
+        double sequntial_Resultt = PiExperiment_sequntial(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
         long endTime = System.currentTimeMillis();
         long runTime_sequntial = endTime - startTime;
         // TODO add your handling code here:
         long startTime2 = System.currentTimeMillis();
-        double parallel_Resultt=PiExperiment_parallel(Integer.parseInt(number_of_points.getText()),Integer.parseInt(number_of_tasks.getText()),Integer.parseInt(number_of_theards.getText()));
+        double parallel_Resultt = PiExperiment_parallel(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
         long endTime2 = System.currentTimeMillis();
         long runTime_parallel = endTime2 - startTime2;
-         pi_seq=sequntial_Resultt;
-         pi_par=parallel_Resultt;
-          run_seq=runTime_sequntial;
-          run_par=runTime_parallel;
+        pi_seq = sequntial_Resultt;
+        pi_par = parallel_Resultt;
+        run_seq = runTime_sequntial;
+        run_par = runTime_parallel;
+        type = "both";
         setVisible(false);
         jFrame1.setVisible(true);
-          fill_Table( sequntial_Resultt, runTime_sequntial,parallel_Resultt,runTime_parallel);
-        
-        
+        fill_Table(sequntial_Resultt, runTime_sequntial, parallel_Resultt, runTime_parallel);
+
+
     }//GEN-LAST:event_BothActionPerformed
 
     private void number_of_theardsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_number_of_theardsActionPerformed
@@ -408,11 +461,37 @@ double estimatePi_Result=par.estimatePi(config);
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-   
-        MonteCarloPiScatterFrame frame=new MonteCarloPiScatterFrame();
-        frame.setConfig(config.getTotalPoints() ,  config.getNumTasks(), config.getNumThreads(), pi_seq,pi_par);
+
+        MonteCarloPiScatterFrame frame = new MonteCarloPiScatterFrame();
+        switch (type) {
+            case "par":
+
+                frame.setParallelOnly(config.getTotalPoints(), config.getNumTasks(), config.getNumThreads(), pi_par);
+                break;
+
+            case "seq":
+                frame.setSequentialOnly(config.getTotalPoints(), config.getNumTasks(), config.getNumThreads(), pi_seq);
+                break;
+
+            case "both":
+                frame.setConfig(config.getTotalPoints(), config.getNumTasks(), config.getNumThreads(), pi_seq, pi_par);
+                break;
+
+        }
+
         frame.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        setVisible(true);
+        jFrame1.setVisible(false);
+        number_of_points.setText("");
+        number_of_tasks.setText("");
+        number_of_theards.setText("");
+
+
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -460,7 +539,7 @@ double estimatePi_Result=par.estimatePi(config);
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new PiExperimentRunner_form().setVisible(true);
-                
+
             }
         });
     }
@@ -470,6 +549,7 @@ double estimatePi_Result=par.estimatePi(config);
     private javax.swing.JButton Run_par;
     private javax.swing.JButton Run_suq;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

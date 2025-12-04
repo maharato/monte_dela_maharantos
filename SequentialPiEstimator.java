@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Circle;
+package Circle.monte_dela_maharantos;
 
 /**
  *
@@ -20,10 +20,11 @@ public class SequentialPiEstimator implements PiEstimator {
 
         for (long i = 0; i < totalPoints; i++) {
 
-            double x = ThreadLocalRandom.current().nextDouble();
+
+            double x = ThreadLocalRandom.current().nextDouble(); 
             double y = ThreadLocalRandom.current().nextDouble();
 
-            if (x * x + y * y <= 1.0) {
+            if ((x * x) + (y * y) <= 1.0) {
                 insideCircle++;
             }
         }

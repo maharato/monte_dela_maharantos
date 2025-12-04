@@ -1,15 +1,18 @@
-package Circle;
+package Circle.monte_dela_maharantos;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MonteCarloPiScatterFrame extends JFrame {
 
+    private enum Mode { SEQ, PAR, BOTH }
+    private Mode mode;
+
     private ScatterPanel scatterPanel;
     private JLabel piLabel;
+    private JLabel liveErrorLabel; // NEW
     private JLabel errorLabel;
     private JLabel seqLabel;
     private JLabel parLabel;
@@ -22,7 +25,6 @@ public class MonteCarloPiScatterFrame extends JFrame {
     private ParallelPiEstimator estimator;
 
     private double finalPiPar = 0;
-
     private long insideCount = 0;
     private long totalCount = 0;
 
@@ -30,26 +32,53 @@ public class MonteCarloPiScatterFrame extends JFrame {
         initUI();
     }
 
-    public void setConfig(long points, int tasks, int threads, double piSeq, double piPar) {
-
-        pointsField.setText(String.valueOf(points));
-        tasksField.setText(String.valueOf(tasks));
-        threadsField.setText(String.valueOf(threads));
-
-        pointsField.setEditable(false);
-        tasksField.setEditable(false);
-        threadsField.setEditable(false);
+    public void setSequentialOnly(long points, int tasks, int threads, double piSeq) {
+        mode = Mode.SEQ;
+        setInputs(points, tasks, threads);
 
         seqLabel.setText("Sequential π = " + String.format("%.6f", piSeq));
-        parLabel.setText("Parallel π   = pending...");
+        parLabel.setText("Parallel π = ---");
 
-        this.finalPiPar = piPar;
-
+        finalPiPar = piSeq;
         startSimulation();
     }
 
-    private void initUI() {
+    public void setParallelOnly(long points, int tasks, int threads, double piPar) {
+        mode = Mode.PAR;
+        setInputs(points, tasks, threads);
 
+        seqLabel.setText("Sequential π = ---");
+        parLabel.setText("Parallel π = pending...");
+
+        finalPiPar = piPar;
+        startSimulation();
+    }
+
+    public void setConfig(long points, int tasks, int threads, double piSeq, double piPar) {
+        mode = Mode.BOTH;
+        setInputs(points, tasks, threads);
+
+        seqLabel.setText("Sequential π = " + String.format("%.6f", piSeq));
+        parLabel.setText("Parallel π = pending...");
+
+        finalPiPar = piPar;
+        startSimulation();
+    }
+
+    private void setInputs(long points, int tasks, int threads) {
+        pointsField.setText(String.valueOf(points));
+        tasksField.setText(String.valueOf(tasks));
+        threadsField.setText(String.valueOf(threads));
+        lockInputs();
+    }
+
+    private void lockInputs() {
+        pointsField.setEditable(false);
+        tasksField.setEditable(false);
+        threadsField.setEditable(false);
+    }
+
+    private void initUI() {
         setTitle("Monte Carlo π Visualization");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -68,15 +97,17 @@ public class MonteCarloPiScatterFrame extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        JPanel bottomPanel = new JPanel(new GridLayout(4, 1));
+        JPanel bottomPanel = new JPanel(new GridLayout(5, 1)); // 5 not 4
         seqLabel = new JLabel("Sequential π = ---");
         parLabel = new JLabel("Parallel π   = ---");
         piLabel = new JLabel("Live π = ---");
+        liveErrorLabel = new JLabel("Live Error = ---"); // NEW
         errorLabel = new JLabel("Final Error = ---");
 
         bottomPanel.add(seqLabel);
         bottomPanel.add(parLabel);
         bottomPanel.add(piLabel);
+        bottomPanel.add(liveErrorLabel); // NEW
         bottomPanel.add(errorLabel);
 
         add(bottomPanel, BorderLayout.SOUTH);
@@ -91,44 +122,69 @@ public class MonteCarloPiScatterFrame extends JFrame {
     private void startSimulation() {
         running = true;
         scatterPanel.clearPoints();
-
         insideCount = 0;
         totalCount = 0;
 
         long points = Long.parseLong(pointsField.getText());
-        int tasks = Integer.parseInt(tasksField.getText());
-        int threads = Integer.parseInt(threadsField.getText());
+        if (mode == Mode.SEQ) {
+            runSequential(points);
+        } else {
+            int tasks = Integer.parseInt(tasksField.getText());
+            int threads = Integer.parseInt(threadsField.getText());
+            runParallel(points, tasks, threads);
+        }
+    }
 
+    private void runSequential(long points) {
+        new Thread(() -> {
+            for (long i = 0; i < points && running; i++) {
+                double x = Math.random();
+                double y = Math.random();
+                boolean inside = (x * x + y * y <= 1.0);
+
+                updatePointUI(x, y, inside);
+            }
+            showFinal();
+        }).start();
+    }
+
+    private void runParallel(long points, int tasks, int threads) {
         estimator = new ParallelPiEstimator();
         SimulationConfig config = new SimulationConfig(points, tasks, threads);
 
         estimator.setPointListener((x, y, inside) -> {
             if (!running) return;
-
-            totalCount++;
-            if (inside) insideCount++;
-
-            double livePI = 4.0 * insideCount / totalCount;
-
-            SwingUtilities.invokeLater(() -> {
-                scatterPanel.addPoint(x, y, inside);
-                piLabel.setText("Live π = " + String.format("%.6f", livePI));
-            });
+            updatePointUI(x, y, inside);
         });
 
         new Thread(() -> {
             estimator.estimatePi(config);
-
-            SwingUtilities.invokeLater(() -> {
-                piLabel.setText("Final π = " + String.format("%.6f", finalPiPar));
-                errorLabel.setText("Final Error = " +
-                        String.format("%.6f", Math.abs(Math.PI - finalPiPar)));
-                parLabel.setText("Parallel π = " + String.format("%.6f", finalPiPar));
-            });
-
-            running = false;
-
+            showFinal();
         }).start();
+    }
+
+    private void updatePointUI(double x, double y, boolean inside) {
+        totalCount++;
+        if (inside) insideCount++;
+
+        double livePi = 4.0 * insideCount / totalCount;
+        double liveErr = Math.abs(Math.PI - livePi);
+
+        SwingUtilities.invokeLater(() -> {
+            scatterPanel.addPoint(x, y, inside);
+            piLabel.setText("Live π = " + String.format("%.6f", livePi));
+            liveErrorLabel.setText("Live Error = " + String.format("%.6f", liveErr)); // NEW
+        });
+    }
+
+    private void showFinal() {
+        running = false;
+        SwingUtilities.invokeLater(() -> {
+            piLabel.setText("Final π = " + String.format("%.6f", finalPiPar));
+            errorLabel.setText("Final Error = " +
+                    String.format("%.6f", Math.abs(Math.PI - finalPiPar)));
+            parLabel.setText("Parallel π = " + String.format("%.6f", finalPiPar));
+        });
     }
 
     private static class ScatterPanel extends JPanel {
@@ -136,7 +192,6 @@ public class MonteCarloPiScatterFrame extends JFrame {
         private static class PointData {
             double x, y;
             boolean inside;
-
             PointData(double x, double y, boolean inside) {
                 this.x = x;
                 this.y = y;
@@ -170,13 +225,13 @@ public class MonteCarloPiScatterFrame extends JFrame {
 
             g.setColor(Color.BLACK);
             g.drawRect(ox, oy, size, size);
+
             g.setColor(Color.LIGHT_GRAY);
             g.drawArc(ox, oy, size * 2, size * 2, 90, -90);
 
             for (PointData p : points) {
                 int px = ox + (int)(p.x * size);
                 int py = oy + (int)((1 - p.y) * size);
-
                 g.setColor(p.inside ? Color.GREEN : Color.RED);
                 g.fillOval(px - 2, py - 2, 4, 4);
             }

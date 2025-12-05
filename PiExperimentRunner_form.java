@@ -11,11 +11,11 @@ import javax.swing.table.*;
 
 /**
  *
- * @author ahmed
+ * @author Ahmed
  */
 public class PiExperimentRunner_form extends javax.swing.JFrame {
 
-    SimulationConfig config = new SimulationConfig(0, 0, 0);
+    SimulationConfig config;
 
     double pi_seq = 0;
     double pi_par = 0;

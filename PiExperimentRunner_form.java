@@ -37,38 +37,38 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
         return estimatePi_Result;
     }
 
-    void validator() {
+    boolean validator() {
 
         String pointsStr = number_of_points.getText().trim();
         String tasksStr = number_of_tasks.getText().trim();
         String threadsStr = number_of_theards.getText().trim();
 
-        // Check Empty Fields First
         if (pointsStr.isEmpty() || tasksStr.isEmpty() || threadsStr.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "❌ All fields must be filled!",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
 
-        // Check numeric only
         if (!pointsStr.matches("\\d+") || !tasksStr.matches("\\d+") || !threadsStr.matches("\\d+")) {
             JOptionPane.showMessageDialog(this,
                     "❌ Please enter valid positive numbers only!",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
 
-        // Check positive values
         if (Integer.parseInt(pointsStr) <= 0
                 || Integer.parseInt(tasksStr) <= 0
                 || Integer.parseInt(threadsStr) <= 0) {
             JOptionPane.showMessageDialog(this,
                     "❌ All values must be greater than zero!",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
+
+        return true; // ✔ Everything OK
     }
+
 
     void fill_Table(double estimatePi_Result, long runTime, String version) {
 
@@ -386,7 +386,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
 
     private void Run_parActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Run_parActionPerformed
         // TODO add your handling code here:
-        validator();
+        if (!validator()) return;
         SimulationConfig con = new SimulationConfig(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
 
         config = con;
@@ -405,7 +405,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     }//GEN-LAST:event_Run_parActionPerformed
 
     private void Run_suqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Run_suqActionPerformed
-        validator();
+        if (!validator()) return;
         SimulationConfig con = new SimulationConfig(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
         config = con;
         long startTime = System.currentTimeMillis();
@@ -427,7 +427,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
 
     private void BothActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BothActionPerformed
 
-        validator();
+        if (!validator()) return;
         SimulationConfig con = new SimulationConfig(Integer.parseInt(number_of_points.getText()), Integer.parseInt(number_of_tasks.getText()), Integer.parseInt(number_of_theards.getText()));
         config = con;
         long startTime = System.currentTimeMillis();

@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MonteCarloPiScatterFrame extends JFrame {
+public class MonteCarloPiScatterFrame extends JPanel {
 
     private enum Mode { SEQ, PAR, BOTH }
     private Mode mode;

@@ -29,6 +29,6 @@ public class SequentialPiEstimator implements PiEstimator {
             }
         }
 
-        return 4.0 * insideCircle / totalPoints;
+        return 4.0 * insideCircle / totalPoints;  
     }
 }

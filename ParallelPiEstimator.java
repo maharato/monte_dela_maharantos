@@ -39,10 +39,11 @@ public class ParallelPiEstimator implements PiEstimator {
         long totalPoints = config.getTotalPoints();
         int numTasks = config.getNumTasks();
         int numThreads = config.getNumThreads();
+//        Runtime.getRuntime().availableProcessors
 
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-        long pointsPerTask = totalPoints / numTasks;
+     long pointsPerTask = totalPoints / numTasks;   //      1000/2=500
 
         List<Future<Long>> results = new ArrayList<>();
 
@@ -51,14 +52,14 @@ public class ParallelPiEstimator implements PiEstimator {
             Callable<Long> task = () -> {
                 long inside = 0;
                 for (long j = 0; j < pointsPerTask; j++) {
-
                     double x = ThreadLocalRandom.current().nextDouble();
                     double y = ThreadLocalRandom.current().nextDouble();
 
                     boolean insidePoint = (x * x + y * y <= 1.0);
                     if (insidePoint) inside++;
 
-                    // 🔥 Notify GUI for visualization (if registered)
+                  
+                    
                     if (listener != null) {
                         double px = x;
                         double py = y;

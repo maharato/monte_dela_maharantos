@@ -7,15 +7,17 @@ import java.util.List;
 
 public class MonteCarloPiScatterFrame extends JPanel {
 
-    private enum Mode { SEQ, PAR, BOTH }
+    private enum Mode {
+        SEQ, PAR, BOTH
+    }
     private Mode mode;
 
-    private ScatterPanel scatterPanel;
-    private JLabel piLabel;
-    private JLabel liveErrorLabel; // NEW
-    private JLabel errorLabel;
-    private JLabel seqLabel;
-    private JLabel parLabel;
+    private  ScatterPanel scatterPanel;
+    private  JLabel piLabel;
+    private  JLabel liveErrorLabel; // NEW
+    private  JLabel errorLabel;
+    private  JLabel seqLabel;
+    private  JLabel parLabel;
 
     private JTextField pointsField;
     private JTextField tasksField;
@@ -27,6 +29,7 @@ public class MonteCarloPiScatterFrame extends JPanel {
     private double finalPiPar = 0;
     private long insideCount = 0;
     private long totalCount = 0;
+     JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     public MonteCarloPiScatterFrame() {
         initUI();
@@ -34,7 +37,7 @@ public class MonteCarloPiScatterFrame extends JPanel {
 
     public void setSequentialOnly(long points, int tasks, int threads, double piSeq) {
         mode = Mode.SEQ;
-        setInputs(points, tasks, threads);
+        setInputs(points);
 
         seqLabel.setText("Sequential π = " + String.format("%.6f", piSeq));
         parLabel.setText("Parallel π = ---");
@@ -69,6 +72,19 @@ public class MonteCarloPiScatterFrame extends JPanel {
         pointsField.setText(String.valueOf(points));
         tasksField.setText(String.valueOf(tasks));
         threadsField.setText(String.valueOf(threads));
+        
+        topPanel.add(new JLabel("Tasks:"));
+        topPanel.add(tasksField);
+        topPanel.add(new JLabel("Threads:"));
+        topPanel.add(threadsField);
+         
+        lockInputs();
+    }
+     private void setInputs(long points) {
+        pointsField.setText(String.valueOf(points));
+        tasksField.setVisible(false);
+        threadsField.setVisible(false);
+       
         lockInputs();
     }
 
@@ -79,21 +95,18 @@ public class MonteCarloPiScatterFrame extends JPanel {
     }
 
     private void initUI() {
-        setTitle("Monte Carlo π Visualization");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         setLayout(new BorderLayout());
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+       
         pointsField = new JTextField("", 8);
+     
         tasksField = new JTextField("", 5);
         threadsField = new JTextField("", 5);
 
         topPanel.add(new JLabel("Points:"));
         topPanel.add(pointsField);
-        topPanel.add(new JLabel("Tasks:"));
-        topPanel.add(tasksField);
-        topPanel.add(new JLabel("Threads:"));
-        topPanel.add(threadsField);
+       
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -115,8 +128,8 @@ public class MonteCarloPiScatterFrame extends JPanel {
         scatterPanel = new ScatterPanel();
         add(scatterPanel, BorderLayout.CENTER);
 
-        setSize(920, 750);
-        setLocationRelativeTo(null);
+        setSize(400, 400);
+
     }
 
     private void startSimulation() {
@@ -144,7 +157,7 @@ public class MonteCarloPiScatterFrame extends JPanel {
 
                 updatePointUI(x, y, inside);
             }
-            showFinal();
+            showFinal("seq");
         }).start();
     }
 
@@ -153,19 +166,23 @@ public class MonteCarloPiScatterFrame extends JPanel {
         SimulationConfig config = new SimulationConfig(points, tasks, threads);
 
         estimator.setPointListener((x, y, inside) -> {
-            if (!running) return;
+            if (!running) {
+                return;
+            }
             updatePointUI(x, y, inside);
         });
 
         new Thread(() -> {
             estimator.estimatePi(config);
-            showFinal();
+            showFinal("par");
         }).start();
     }
 
     private void updatePointUI(double x, double y, boolean inside) {
         totalCount++;
-        if (inside) insideCount++;
+        if (inside) {
+            insideCount++;
+        }
 
         double livePi = 4.0 * insideCount / totalCount;
         double liveErr = Math.abs(Math.PI - livePi);
@@ -177,64 +194,100 @@ public class MonteCarloPiScatterFrame extends JPanel {
         });
     }
 
-    private void showFinal() {
+    private void showFinal(String type) {
         running = false;
         SwingUtilities.invokeLater(() -> {
             piLabel.setText("Final π = " + String.format("%.6f", finalPiPar));
-            errorLabel.setText("Final Error = " +
-                    String.format("%.6f", Math.abs(Math.PI - finalPiPar)));
-            parLabel.setText("Parallel π = " + String.format("%.6f", finalPiPar));
+            errorLabel.setText("Final Error = "
+                    + String.format("%.6f", Math.abs(Math.PI - finalPiPar)));
+            if (type.equals("par")) {
+                parLabel.setText("Parallel π = " + String.format("%.6f", finalPiPar));
+            }
         });
     }
 
     private static class ScatterPanel extends JPanel {
 
         private static class PointData {
-            double x, y;
-            boolean inside;
+
+            final float x, y;
+            final boolean inside;
+
             PointData(double x, double y, boolean inside) {
-                this.x = x;
-                this.y = y;
+                this.x = (float) x;
+                this.y = (float) y;
                 this.inside = inside;
             }
         }
 
-        private final List<PointData> points = new ArrayList<>();
+        private final List<PointData> points = new ArrayList<>(200000);
+        private final Object lock = new Object();
+
+        private static final int MAX_POINTS = 200000; // Limit to avoid memory blow
+        private static final int BATCH_SIZE = 1500;   // Faster frame loading
+        private int pointsToDraw = 0;
+
+        private final Timer animationTimer;
 
         public ScatterPanel() {
             setBackground(Color.WHITE);
+            setDoubleBuffered(true);
+
+      
+            animationTimer = new Timer(1000 / 60, e -> {
+                synchronized (lock) {
+                    if (pointsToDraw < points.size()) {
+                        pointsToDraw = Math.min(pointsToDraw + BATCH_SIZE, points.size());
+                        repaint();
+                    }
+                }
+            });
+            animationTimer.start();
         }
 
         public void addPoint(double x, double y, boolean inside) {
-            points.add(new PointData(x, y, inside));
-            if (points.size() > 60000) points.remove(0);
-            repaint();
+            synchronized (lock) {
+                if (points.size() >= MAX_POINTS) {
+                    points.remove(0); // Remove oldest → continuous animation
+                }
+                points.add(new PointData(x, y, inside));
+            }
         }
 
         public void clearPoints() {
-            points.clear();
-            repaint();
+            synchronized (lock) {
+                points.clear();
+                pointsToDraw = 0;
+                repaint();
+            }
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
             int size = Math.min(getWidth(), getHeight()) - 60;
             int ox = 30, oy = 30;
 
-            g.setColor(Color.BLACK);
-            g.drawRect(ox, oy, size, size);
+            // Draw square & quarter circle
+            g2.setColor(Color.BLACK);
+            g2.drawRect(ox, oy, size, size);
+            g2.setColor(Color.GRAY);
+            g2.drawArc(ox, oy, size * 2, size * 2, 90, -90);
 
-            g.setColor(Color.LIGHT_GRAY);
-            g.drawArc(ox, oy, size * 2, size * 2, 90, -90);
-
-            for (PointData p : points) {
-                int px = ox + (int)(p.x * size);
-                int py = oy + (int)((1 - p.y) * size);
-                g.setColor(p.inside ? Color.GREEN : Color.RED);
-                g.fillOval(px - 2, py - 2, 4, 4);
+            synchronized (lock) {
+                for (int i = 0; i < pointsToDraw; i++) {
+                    PointData p = points.get(i);
+                    int px = ox + (int) (p.x * size);
+                    int py = oy + (int) ((1 - p.y) * size);
+                    g2.setColor(p.inside ? new Color(0, 150, 0) : Color.RED);
+                    g2.fillRect(px, py, 2, 2); // Faster than oval
+                }
             }
         }
     }
+
 }

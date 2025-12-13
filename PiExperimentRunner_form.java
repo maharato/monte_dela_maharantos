@@ -30,6 +30,10 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     static double avg_ErrorSEQ;
     static double error;
     static double errorSeq;
+    static double speedup;
+
+   
+    
   
   
     DefaultTableModel Table = new DefaultTableModel();
@@ -49,16 +53,24 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     }
     void update_avgErrorSeq(){
     
-    avg_ErrorSEQ=errorSeq/counter_seq;
-    avgErrorseq.setText(String.valueOf(avg_ErrorSEQ));
+    avg_ErrorSEQ=(errorSeq/counter_seq);
+    avgErrorseq.setText(String.format("%.4f",avg_ErrorSEQ));
     counter_seq++;
     
     }
     void update_avgErrorpar(){
     
-    avg_Error=error/counter_par;
-    avgError.setText(String.valueOf(avg_Error));
+    avg_Error=(error/counter_par);
+   
+    avgError.setText(String.format("%.4f", avg_Error ));
     counter_par++;
+    
+   
+    }
+    void updateSpeedUp(){
+        speedup=avg_Error/avg_ErrorSEQ;
+    
+     speedUp.setText(String.format("%.4f", speedup ));
     
     }
 
@@ -139,6 +151,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
         jTable1.setModel(Table);
         i++;
     }
+    
 
     void montePanel() {
         MonteCarloPiScatterFrame frame = new MonteCarloPiScatterFrame();
@@ -237,6 +250,8 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
         jFrame2.setVisible(false);
 
     }
+   
+    
 
     public PiExperimentRunner_form() {
         initComponents();
@@ -276,6 +291,8 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
         avgError = new javax.swing.JTextField();
         avgErrorseq = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        speedUp = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
         jFrame2 = new javax.swing.JFrame();
         jPanel5 = new javax.swing.JPanel();
         Parr_button = new javax.swing.JButton();
@@ -385,6 +402,15 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel8.setText("Average error S");
 
+        speedUp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                speedUpActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel7.setText("AvgspeedUp");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -394,8 +420,15 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 880, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(161, 161, 161)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(161, 161, 161))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(speedUp, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(71, 71, 71)))
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(82, 82, 82)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -431,7 +464,12 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
                         .addGap(20, 20, 20)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(avgErrorseq, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(speedUp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -718,7 +756,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
        double par_Error=Math.abs(Math.PI-parallel_Resultt);
        error=error+par_Error;
         update_avgErrorpar();
-    
+    updateSpeedUp();
     
         fill_Table(parallel_Resultt, runTime_parallel, "parallel");
         montePanel();
@@ -743,6 +781,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
         double Seq_Error=Math.abs(Math.PI-sequntial_Resultt);
         errorSeq=errorSeq+Seq_Error;
         update_avgErrorSeq();
+        updateSpeedUp();
         fill_Table(sequntial_Resultt, runTime_sequntial, "sequntial");
         montePanel();
     }//GEN-LAST:event_Run_suqActionPerformed
@@ -779,6 +818,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
        errorSeq=errorSeq+seq_Error;
         update_avgErrorpar();
         update_avgErrorSeq();
+        updateSpeedUp();
         fill_Table(sequntial_Resultt, runTime_sequntial, parallel_Resultt, runTime_parallel);
         montePanel();
 
@@ -821,6 +861,10 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     private void avgErrorseqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_avgErrorseqActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_avgErrorseqActionPerformed
+
+    private void speedUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_speedUpActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_speedUpActionPerformed
 
     /**
      * @param args the command line arguments
@@ -891,6 +935,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -906,5 +951,6 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     private javax.swing.JTextField number_of_tasks;
     private javax.swing.JTextField number_of_theards;
     private javax.swing.JButton seq_button;
+    private javax.swing.JTextField speedUp;
     // End of variables declaration//GEN-END:variables
 }

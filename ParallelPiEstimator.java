@@ -43,7 +43,7 @@ public class ParallelPiEstimator implements PiEstimator {
 
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-     long pointsPerTask = totalPoints / numTasks;   //      1000/2=500
+     long pointsPerTask = totalPoints / numTasks;   
 
         List<Future<Long>> results = new ArrayList<>();
 

@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MonteCarloPiScatterFrame extends JPanel {
 
@@ -151,8 +152,8 @@ public class MonteCarloPiScatterFrame extends JPanel {
     private void runSequential(long points) {
         new Thread(() -> {
             for (long i = 0; i < points && running; i++) {
-                double x = Math.random();
-                double y = Math.random();
+                double x = ThreadLocalRandom.current().nextDouble();
+                double y = ThreadLocalRandom.current().nextDouble();
                 boolean inside = (x * x + y * y <= 1.0);
 
                 updatePointUI(x, y, inside);

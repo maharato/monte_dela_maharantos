@@ -33,14 +33,7 @@ public class SimulationConfig {
         return numThreads;
     }
 
-    @Override
-    public String toString() {
-        return "SimulationConfig{" +
-                "totalPoints=" + totalPoints +
-                ", numTasks=" + numTasks +
-                ", numThreads=" + numThreads +
-                '}';
-    }
+ 
 }
 
    

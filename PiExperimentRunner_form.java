@@ -53,7 +53,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
     }
     void update_avgErrorSeq(){
     
-    avg_ErrorSEQ=(errorSeq/counter_seq);
+    avg_ErrorSEQ=(run_seq/counter_seq);
     avgErrorseq.setText(String.format("%.4f",avg_ErrorSEQ));
     counter_seq++;
     
@@ -68,7 +68,7 @@ public class PiExperimentRunner_form extends javax.swing.JFrame {
    
     }
     void updateSpeedUp(){
-        speedup=avg_Error/avg_ErrorSEQ;
+        speedup=avg_ErrorSEQ/run_par;
     
      speedUp.setText(String.format("%.4f", speedup ));
     

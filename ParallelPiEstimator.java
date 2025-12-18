@@ -39,7 +39,7 @@ public class ParallelPiEstimator implements PiEstimator {
         long totalPoints = config.getTotalPoints();
         int numTasks = config.getNumTasks();
         int numThreads = config.getNumThreads();
-//        Runtime.getRuntime().availableProcessors
+//       Runtime.getRuntime().availableProcessors
 
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
